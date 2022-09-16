@@ -58,14 +58,4 @@ public class SignatureContainer implements IExternalSignatureContainer {
         HttpPost post = new HttpPost("https://cas.staging.iti.br/oauth2.0/token");
         return httpclient.execute(post);
     }
-
-    /**
-     * Para gerar um pacote PKCS#7 contendo a assinatura digital de um HASH SHA-256.
-     */
-    private static String hashSHA256(InputStream data) throws GeneralSecurityException, IOException {
-        String hashAlgorithm = "SHA256";
-        BouncyCastleDigest digest = new BouncyCastleDigest();
-        byte[] documentHash = DigestAlgorithms.digest(data, digest.getMessageDigest(hashAlgorithm));
-        return Base64.getEncoder().encodeToString(documentHash);
-    }
 }
