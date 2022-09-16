@@ -23,10 +23,10 @@ public class GetTokenService {
     @Value("${data.secret}")
     private String secret;
     @Autowired
-    private WebClient webClient;
+    private WebClient webClientOauth;
 
     public String getToken(String code) {
-        Mono<GetTokenReturnModel> tokenReturnModelMono = this.webClient.method(HttpMethod.POST).
+        Mono<GetTokenReturnModel> tokenReturnModelMono = this.webClientOauth.method(HttpMethod.POST).
                 uri(uriBuilder -> uriBuilder.path("/token")
                         .queryParam("code", code)
                         .queryParam("client_id", this.clientId)
@@ -35,8 +35,6 @@ public class GetTokenService {
                         .queryParam("redirect_uri", this.redirectUri).build())
                 .retrieve()
                 .bodyToMono(GetTokenReturnModel.class);
-
-        System.out.println(tokenReturnModelMono);
 
         GetTokenReturnModel getTokenReturnModel = tokenReturnModelMono.block();
 

@@ -24,66 +24,6 @@ import java.util.Base64;
 import java.util.List;
 
 public class RequestsApiGovBr {
-
-    public static String geToken(String code, String clientId, String secret, String redirectUri) throws IOException, GeneralSecurityException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-
-        HttpPost post = new HttpPost("https://cas.staging.iti.br/oauth2.0/token");
-
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("code", code));
-        urlParameters.add(new BasicNameValuePair("client_id", clientId));
-        urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        urlParameters.add(new BasicNameValuePair("client_secret", secret));
-        urlParameters.add(new BasicNameValuePair("redirect_uri", redirectUri));
-
-        post.setEntity(new UrlEncodedFormEntity(urlParameters));
-
-        CloseableHttpResponse response = httpclient.execute(post);
-
-        HttpEntity entity = response.getEntity();
-
-        // String json = EntityUtils.toString(entity, StandardCharsets.UTF_8);
-
-        // return inputStream.toString();
-        return "";
-    }
-
-    /**
-     * TODO: melhorar essa descrição
-     * Pegar o token na api do gov br
-     * @param code
-     * @param clientId
-     * @param secret
-     * @param redirectUri
-     * @return
-     * @throws IOException
-     * @throws GeneralSecurityException
-     */
-    public static String geTokenWithWebClient(String code, String clientId, String secret, String redirectUri) throws IOException, GeneralSecurityException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-
-        HttpPost post = new HttpPost("https://cas.staging.iti.br/oauth2.0/token");
-
-        List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair("code", code));
-        urlParameters.add(new BasicNameValuePair("client_id", clientId));
-        urlParameters.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        urlParameters.add(new BasicNameValuePair("client_secret", secret));
-        urlParameters.add(new BasicNameValuePair("redirect_uri", redirectUri));
-
-        post.setEntity(new UrlEncodedFormEntity(urlParameters));
-
-        CloseableHttpResponse response = httpclient.execute(post);
-
-        HttpEntity entity = response.getEntity();
-
-        // String json = EntityUtils.toString(entity, StandardCharsets.UTF_8);
-
-        // return inputStream.toString();
-        return "";
-    }
-
     /**
      * Para gerar um pacote PKCS#7 contendo a assinatura digital de um HASH SHA-256
      * utilizando a chave privada do usuário, deve-se fazer uma requisição HTTP POST

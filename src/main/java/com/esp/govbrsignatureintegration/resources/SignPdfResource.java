@@ -1,5 +1,6 @@
 package com.esp.govbrsignatureintegration.resources;
 
+import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,15 +16,30 @@ public class SignPdfResource {
     @Autowired
     private GetTokenService getTokenService;
 
+    @Autowired
+    private AssinarPKCS7Service assinarPKCS7Service;
+
+    /**
+     * TODO: colocar documentação
+     * @param code
+     * @param pdf
+     * @return
+     */
     @GetMapping("/{code}")
     public String uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
         String token = this.getTokenService.getToken(code);
 
-        System.out.println("token: " + token);
+        String assinatura = this.assinarPKCS7Service.getAssinaturaPKC7(token, "");
 
-        return code;
+        System.out.println("assinatura: " + assinatura);
+
+        return assinatura;
     }
 
+    /**
+     * Toda para testes
+     * @return
+     */
     @GetMapping("/test")
     public String test() {
         return "teste";

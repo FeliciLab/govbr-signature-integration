@@ -3,3 +3,4 @@ data:
   clientId: devLocal
   secret: younIrtyij3
   servidorOauth: cas.staging.iti.br/oauth2.0
+  assinaturaApiUri: https://assinatura-api.staging.iti.br/externo/v2/

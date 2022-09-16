@@ -14,14 +14,23 @@ public class GovbrSignatureIntegrationApplication {
     @Value("${data.servidorOauth}")
     private String servidorOauth;
 
-    @Bean
-    public WebClient webClient(WebClient.Builder builder) {
-        String baseUrl = "https://" + servidorOauth;
+    @Value("${data.assinaturaApiUri}")
+    private String assinaturaApiUri;
 
-        System.out.println(baseUrl);
+    @Bean
+    public WebClient webClientOauth(WebClient.Builder builder) {
+        String baseUrl = "https://" + servidorOauth;
 
         return builder
                 .baseUrl(baseUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+
+    @Bean
+    public WebClient webClientAssinatura(WebClient.Builder builder) {
+        return builder
+                .baseUrl(this.assinaturaApiUri)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
