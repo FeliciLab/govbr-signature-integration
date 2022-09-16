@@ -1,0 +1,5 @@
+data:
+  redirectUri: http://localhost:8080/
+  clientId: devLocal
+  secret: younIrtyij3
+  servidorOauth: cas.staging.iti.br/oauth2.0
