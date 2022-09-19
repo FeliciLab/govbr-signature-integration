@@ -1,9 +1,14 @@
 package com.esp.govbrsignatureintegration.resources;
 
+import com.esp.govbrsignatureintegration.signature.SignatureContainer;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
 import com.esp.govbrsignatureintegration.utils.Util;
+import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.signatures.PdfSignatureAppearance;
+import com.itextpdf.signatures.PdfSigner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -27,55 +33,63 @@ public class SignPdfResource {
 
     /**
      * TODO: colocar documentação
+     *
      * @param code
      * @param pdf
      * @return
      */
     @GetMapping("/{code}")
     public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
-        String token = this.getTokenService.getToken(code);
-
-        String assinatura = null;
-
         try {
-            String hash = Util.generateHashSHA256(pdf.getInputStream());
-
-            assinatura = this.assinarPKCS7Service.getAssinaturaPKC7(token, hash);
-
             PdfReader pdfReader = new PdfReader(pdf.getInputStream());
 
-            // TODO: continuar aqui
-            // Como passar o pdf como retorno????
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            System.out.println("assinatura: " + assinatura);
+            String token = this.getTokenService.getToken(code);
+
+            String hash = Util.generateHashSHA256(pdf.getInputStream());
+
+            String assinatura  = this.assinarPKCS7Service.getAssinaturaPKC7(token, hash);
+
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
+
+            Rectangle rectangle = new Rectangle(50, 50, 200, 50);
+
+            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+
+            // Mudando as Captions
+            appearance.setReasonCaption("Razão: ");
+            appearance.setLocationCaption("Localização: ");
+
+            SignatureContainer signatureContainer = new SignatureContainer(assinatura);
+
+            appearance
+                    .setReason("SIGN.GOV.BR")
+                    .setLocation("ESP - Escola de Saúde Pública do CE")
+                    .setPageRect(rectangle)
+                    .setPageNumber(1);
+
+            pdfSigner.setFieldName("Assinatura ESP");
+
+            pdfSigner.signExternalContainer(signatureContainer, 8192);
+
+            byte[] outputBytes = byteArrayOutputStream.toByteArray();
+
+            byteArrayOutputStream.close();
 
             HttpHeaders headers = new HttpHeaders();
 
-            headers.add("Content-Disposition", "inline; filename=citiesreport.pdf");
+            // headers.add("Content-Disposition", "inline; filename=citiesreport.pdf");
 
-            // TODO: por enquanto estou retornando o mesmo arquivo para testar
             return ResponseEntity
                     .ok()
                     .headers(headers)
                     .contentType(MediaType.APPLICATION_PDF)
-                    .body(new InputStreamResource(new ByteArrayInputStream(pdf.getBytes())));
-
+                    .body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
     }
-
-    /**
-     * Toda para testes
-     * @return
-     */
-    @GetMapping("/test")
-    public String test() {
-        return "teste";
-    }
-
 }
