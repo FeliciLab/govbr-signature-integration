@@ -12,14 +12,12 @@ import java.util.Base64;
 public class Util {
 
     /**
-     * TODO: colocar esse método em um local mais apropriado
-     * Para gerar um pacote PKCS#7 contendo a assinatura digital de um HASH SHA-256.
+     * Retorna o base64 de um hash SHA-256
      */
     public static String generateHashSHA256(InputStream data) throws GeneralSecurityException, IOException {
         BouncyCastleDigest digest = new BouncyCastleDigest();
 
-        byte[] documentHash = DigestAlgorithms
-                .digest(data, digest.getMessageDigest("SHA256"));
+        byte[] documentHash = DigestAlgorithms.digest(data, digest.getMessageDigest("SHA256"));
 
         return Base64.getEncoder().encodeToString(documentHash);
     }
