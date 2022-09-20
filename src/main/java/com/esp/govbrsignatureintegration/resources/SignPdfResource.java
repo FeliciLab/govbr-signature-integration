@@ -1,9 +1,11 @@
 package com.esp.govbrsignatureintegration.resources;
 
-import com.esp.govbrsignatureintegration.signature.SignatureContainer;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
+import com.esp.govbrsignatureintegration.signature.SignatureContainer;
 import com.esp.govbrsignatureintegration.utils.Util;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
@@ -31,8 +33,10 @@ public class SignPdfResource {
     @Autowired
     private AssinarPKCS7Service assinarPKCS7Service;
 
+    @Autowired
+    private ImageData govbrImageData;
+
     /**
-     * TODO: colocar documentação
      *
      * @param code
      * @param pdf
@@ -47,15 +51,24 @@ public class SignPdfResource {
 
             String token = this.getTokenService.getToken(code);
 
+            System.out.println("token :" + token);
+
             String hash = Util.generateHashSHA256(pdf.getInputStream());
 
-            String assinatura  = this.assinarPKCS7Service.getAssinaturaPKC7(token, hash);
+            System.out.println("hash :" + hash);
+
+            byte[] assinatura  = this.assinarPKCS7Service.getAssinaturaPKC7(token, hash);
+
+            System.out.println("Chegou aqui");
+            System.out.println("Assinatura: " + assinatura.toString());
 
             PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
 
-            Rectangle rectangle = new Rectangle(50, 50, 200, 50);
+            Rectangle rectangle = new Rectangle(320, 150, 100, 50);
 
             PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+
+            // appearance.setImage(this.govbrImageData);
 
             // Mudando as Captions
             appearance.setReasonCaption("Razão: ");
@@ -65,21 +78,19 @@ public class SignPdfResource {
 
             appearance
                     .setReason("SIGN.GOV.BR")
-                    .setLocation("ESP - Escola de Saúde Pública do CE")
+                    .setLocation("ESP")
                     .setPageRect(rectangle)
                     .setPageNumber(1);
 
-            pdfSigner.setFieldName("Assinatura ESP");
+            pdfSigner.setFieldName("Sig");
 
-            pdfSigner.signExternalContainer(signatureContainer, 8192);
+            pdfSigner.signExternalContainer(signatureContainer, 4096);
 
             byte[] outputBytes = byteArrayOutputStream.toByteArray();
 
-            byteArrayOutputStream.close();
-
             HttpHeaders headers = new HttpHeaders();
 
-            // headers.add("Content-Disposition", "inline; filename=citiesreport.pdf");
+            headers.add("Content-Disposition", "inline; filename=citiesreport.pdf");
 
             return ResponseEntity
                     .ok()

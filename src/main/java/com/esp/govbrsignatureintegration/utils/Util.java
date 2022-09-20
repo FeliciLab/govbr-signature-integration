@@ -17,7 +17,10 @@ public class Util {
      */
     public static String generateHashSHA256(InputStream data) throws GeneralSecurityException, IOException {
         BouncyCastleDigest digest = new BouncyCastleDigest();
-        byte[] documentHash = DigestAlgorithms.digest(data, digest.getMessageDigest(MessageDigestAlgorithms.SHA_256));
+
+        byte[] documentHash = DigestAlgorithms
+                .digest(data, digest.getMessageDigest("SHA256"));
+
         return Base64.getEncoder().encodeToString(documentHash);
     }
 }

@@ -15,9 +15,13 @@ import reactor.core.publisher.Mono;
 
 import java.awt.image.DataBuffer;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 public class AssinarPKCS7Service {
@@ -25,26 +29,25 @@ public class AssinarPKCS7Service {
     private WebClient webClientAssinatura;
 
     /**
-     * TODO: documentar
+     * TODO: Estou com problema aqui
+     *
      * @param token
      * @param hashBase64
      * @return
      */
-    public String getAssinaturaPKC7(String token, String hashBase64) {
-        String authorization = "Bearer " + token;
-
+    public byte[] getAssinaturaPKC7(String token, String hashBase64) {
         AssinarPKCS7RequestModel assinarPKCS7RequestModel = new AssinarPKCS7RequestModel(hashBase64);
 
-        Mono<String> mono = this.webClientAssinatura.method(HttpMethod.POST)
+        Mono<byte[]> mono = this.webClientAssinatura.post()
                 .uri("/assinarPKCS7")
-                .header("Authorization", authorization)
-                .body(Mono.just(assinarPKCS7RequestModel), AssinarPKCS7RequestModel.class)
+                .headers(headers -> headers.setBearerAuth(token))
+                .body(assinarPKCS7RequestModel, AssinarPKCS7RequestModel.class)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(byte[].class);
 
-        String pkcs7 = mono.block();
+        byte[] pkc7 = mono.block();
 
-        return pkcs7;
+        return pkc7;
     }
 
 }

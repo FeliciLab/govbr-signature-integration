@@ -8,34 +8,25 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.GeneralSecurityException;
 
 public class SignatureContainer implements IExternalSignatureContainer {
 
-    private String assinatura;
+    private byte[] pkcs7;
 
-    public SignatureContainer(String assinatura) {
-        this.assinatura = assinatura;
+    public SignatureContainer(byte[] pkcs7) {
+        this.pkcs7 = pkcs7;
     }
 
     @Override
     public byte[] sign(InputStream data) {
         try {
-            InputStream inputStream = new ByteArrayInputStream(this.assinatura.getBytes());
-
-            byte[] targetArray = new byte[inputStream.available()];
-
-            inputStream.read(targetArray);
-
-            return targetArray;
-        } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
+            data.read(this.pkcs7);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return new byte[0];
+        return this.pkcs7;
     }
 
     @Override
