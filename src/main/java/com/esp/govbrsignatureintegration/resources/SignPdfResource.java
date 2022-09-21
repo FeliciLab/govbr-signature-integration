@@ -42,27 +42,20 @@ public class SignPdfResource {
      * @param pdf
      * @return
      */
-    @GetMapping("/{code}")
+    @PostMapping("/{code}")
     public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
         try {
             PdfReader pdfReader = new PdfReader(pdf.getInputStream());
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
+            PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
+
             String token = this.getTokenService.getToken(code);
 
-            System.out.println("token :" + token);
+            String hashBase64 = Util.generateHashSHA256(pdf.getInputStream());
 
-            String hash = Util.generateHashSHA256(pdf.getInputStream());
-
-            System.out.println("hash :" + hash);
-
-            byte[] assinatura  = this.assinarPKCS7Service.getAssinaturaPKC7(token, hash);
-
-            System.out.println("Chegou aqui");
-            System.out.println("Assinatura: " + assinatura.toString());
-
-            PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
+            byte[] pkcs7  = this.assinarPKCS7Service.getAssinaturaPKC7(token, hashBase64);
 
             Rectangle rectangle = new Rectangle(320, 150, 100, 50);
 
@@ -74,7 +67,7 @@ public class SignPdfResource {
             appearance.setReasonCaption("Razão: ");
             appearance.setLocationCaption("Localização: ");
 
-            SignatureContainer signatureContainer = new SignatureContainer(assinatura);
+            SignatureContainer signatureContainer = new SignatureContainer(pkcs7);
 
             appearance
                     .setReason("SIGN.GOV.BR")
@@ -84,7 +77,7 @@ public class SignPdfResource {
 
             pdfSigner.setFieldName("Sig");
 
-            pdfSigner.signExternalContainer(signatureContainer, 4096);
+            pdfSigner.signExternalContainer(signatureContainer, 8192);
 
             byte[] outputBytes = byteArrayOutputStream.toByteArray();
 

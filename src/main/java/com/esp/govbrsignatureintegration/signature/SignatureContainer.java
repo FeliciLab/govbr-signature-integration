@@ -15,6 +15,13 @@ public class SignatureContainer implements IExternalSignatureContainer {
 
     private byte[] pkcs7;
 
+    /*
+    TODO: acho que encontrei o probelma
+    Estou gerando o hash no momento errado
+    preciso ajustar para o hash ser criado dendo do método sign dessa classe
+     */
+
+
     public SignatureContainer(byte[] pkcs7) {
         this.pkcs7 = pkcs7;
     }
@@ -22,6 +29,9 @@ public class SignatureContainer implements IExternalSignatureContainer {
     @Override
     public byte[] sign(InputStream data) {
         try {
+
+
+
             data.read(this.pkcs7);
         } catch (IOException e) {
             throw new RuntimeException(e);

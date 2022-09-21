@@ -1,27 +1,18 @@
 package com.esp.govbrsignatureintegration.services;
 
 import com.esp.govbrsignatureintegration.models.AssinarPKCS7RequestModel;
-import com.esp.govbrsignatureintegration.models.GetTokenReturnModel;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.awt.image.DataBuffer;
-import java.io.BufferedOutputStream;
+
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
 
 @Service
 public class AssinarPKCS7Service {
@@ -36,18 +27,28 @@ public class AssinarPKCS7Service {
      * @return
      */
     public byte[] getAssinaturaPKC7(String token, String hashBase64) {
-        AssinarPKCS7RequestModel assinarPKCS7RequestModel = new AssinarPKCS7RequestModel(hashBase64);
+        String authorization = "Bearer " + token;
 
-        Mono<byte[]> mono = this.webClientAssinatura.post()
-                .uri("/assinarPKCS7")
-                .headers(headers -> headers.setBearerAuth(token))
-                .body(assinarPKCS7RequestModel, AssinarPKCS7RequestModel.class)
-                .retrieve()
-                .bodyToMono(byte[].class);
+        try {
+            Flux<DataBuffer> dataBuffer = webClientAssinatura
+                    .post()
+                    .uri("/assinarPKCS7")
+                    .header("Authorization", authorization)
+                    .bodyValue("{\"hashBase64\": \"" + hashBase64  + "\"}")
+                    .retrieve()
+                    .bodyToFlux(DataBuffer.class);
 
-        byte[] pkc7 = mono.block();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        return pkc7;
+            DataBufferUtils.write(dataBuffer, byteArrayOutputStream).share().blockLast();
+
+            return byteArrayOutputStream.toByteArray();
+        } catch (Exception exception) {
+            System.out.println("getAssinaturaPKC7 Exception:");
+            System.err.println(exception.getMessage());
+        }
+
+        return null;
     }
 
 }
