@@ -6,14 +6,14 @@ import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.signatures.IExternalSignatureContainer;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.HttpEntity;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
+/**
+ * Classe que encapsula o processo de assinatura de um documento pdf com a api do gov.br
+ */
 public class SignatureContainer implements IExternalSignatureContainer {
 
     private String code;
@@ -22,6 +22,15 @@ public class SignatureContainer implements IExternalSignatureContainer {
 
     private AssinarPKCS7Service assinarPKCS7Service;
 
+    /**
+     * Construtor que revebe:
+     *
+     * @param code                {@link String} do CODE retornado como parametro depois que o usuário se autenticou
+     *                            no gov.br e usou o código de confirmação que foi enviado via SMS.
+     * @param getTokenService     {@link GetTokenService} responsável por fazer request REST para obter o token
+     * @param assinarPKCS7Service {@link AssinarPKCS7Service} responsável por enviar o hash na request e obter os bytes
+     *                            da assinatura.
+     */
     public SignatureContainer(String code, GetTokenService getTokenService, AssinarPKCS7Service assinarPKCS7Service) {
         this.code = code;
         this.getTokenService = getTokenService;
@@ -30,7 +39,10 @@ public class SignatureContainer implements IExternalSignatureContainer {
 
     @Override
     public byte[] sign(InputStream data) {
+        // Nesse ponto, o data é o InputStream do pdf já preparado, isto é
+        // com o espaço alocado para colocarmos a assinatura
         try {
+            // Pegando o token para poder assinar o documento
             String token = this.getTokenService.getToken(code);
 
             // Gerando o hash do documento preparado
@@ -38,6 +50,7 @@ public class SignatureContainer implements IExternalSignatureContainer {
 
             byte[] pkcs7 = this.assinarPKCS7Service.getAssinaturaPKC7(token, hashBase64);
 
+            // Aqui vai os bytes que serão colocados em hexadecimal no documento
             return pkcs7;
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
