@@ -3,9 +3,7 @@ package com.esp.govbrsignatureintegration.resources;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
 import com.esp.govbrsignatureintegration.signature.SignatureContainer;
-import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.io.image.ImageData;
-import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
@@ -41,11 +39,15 @@ public class SignPdfResource {
      *
      * @param code {@link String} que é passada na rota como variável
      * @param pdf {@link MultipartFile} do arquivo
-     * @return
+     * @return um arquivo pdf assinado.
      */
     @PostMapping(value = "/{code}", produces = "application/pdf")
     public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
         try {
+            String token = this.getTokenService.getToken(code);
+
+            // TODO: encapsular a lógica de assinar um documento em uma classe
+
             PdfReader pdfReader = new PdfReader(pdf.getInputStream());
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -62,7 +64,7 @@ public class SignPdfResource {
             appearance.setReasonCaption("Razão: ");
             appearance.setLocationCaption("Localização: ");
 
-            SignatureContainer signatureContainer = new SignatureContainer(code, this.getTokenService, this.assinarPKCS7Service);
+            SignatureContainer signatureContainer = new SignatureContainer(token, this.assinarPKCS7Service);
 
             appearance
                     .setReason("SIGN.GOV.BR")
@@ -95,21 +97,51 @@ public class SignPdfResource {
     /**
      * Rota para assinar um documentos PDF em Lote.
      *
-     * @param code {@link String} que é passada na rota como variável
-     * @param pdf {@link MultipartFile} do arquivo
-     * @return Retorna um
+     * @param code {@link String} que é passada na rota como variável.
+     * @param pdf {@link MultipartFile} do arquivo.
+     * @return Retorna um arquivo zip com os documentos assinados.
      */
     @PostMapping(value = "/lote/{code}", produces = "application/zip")
     public ResponseEntity<InputStreamResource> uploadFilesToSignInLote(@PathVariable String code, @RequestParam MultipartFile[] pdfs) {
-        // TODO: fazer o recebimento e zid de arquivos inicialmente
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream zipByteArrayOutputStream = new ByteArrayOutputStream();
 
-        ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+        ZipOutputStream zipOutputStream = new ZipOutputStream(zipByteArrayOutputStream);
 
         try {
-            for (MultipartFile pdf: pdfs) {
+            String token = this.getTokenService.getToken(code);
 
-                InputStream inputStream = pdf.getInputStream();
+            for (MultipartFile pdf: pdfs) {
+                PdfReader pdfReader = new PdfReader(pdf.getInputStream());
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
+
+                Rectangle rectangle = new Rectangle(320, 150, 100, 50);
+
+                PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+
+                // appearance.setImage(this.govbrImageData);
+
+                // Mudando as Captions
+                appearance.setReasonCaption("Razão: ");
+                appearance.setLocationCaption("Localização: ");
+
+                SignatureContainer signatureContainer = new SignatureContainer(token, this.assinarPKCS7Service);
+
+                appearance
+                        .setReason("SIGN.GOV.BR")
+                        .setLocation("ESP")
+                        .setPageRect(rectangle)
+                        .setPageNumber(1);
+
+                pdfSigner.setFieldName("Sig");
+
+                pdfSigner.signExternalContainer(signatureContainer, 8192);
+
+                byte[] outputBytes = byteArrayOutputStream.toByteArray();
+
+                InputStream inputStream = new ByteArrayInputStream(outputBytes);
 
                 ZipEntry zipEntry = new ZipEntry(pdf.getOriginalFilename());
 
@@ -127,12 +159,13 @@ public class SignPdfResource {
             }
 
             zipOutputStream.close();
-
-        } catch (Exception exception) {
-            System.err.println(exception.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
         }
 
-        byte[] outputBytes = byteArrayOutputStream.toByteArray();
+        byte[] outputBytes = zipByteArrayOutputStream.toByteArray();
 
         HttpHeaders headers = new HttpHeaders();
 
