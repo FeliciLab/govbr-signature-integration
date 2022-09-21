@@ -51,12 +51,6 @@ public class SignPdfResource {
 
             PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
 
-            String token = this.getTokenService.getToken(code);
-
-            String hashBase64 = Util.generateHashSHA256(pdf.getInputStream());
-
-            byte[] pkcs7  = this.assinarPKCS7Service.getAssinaturaPKC7(token, hashBase64);
-
             Rectangle rectangle = new Rectangle(320, 150, 100, 50);
 
             PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
@@ -67,7 +61,7 @@ public class SignPdfResource {
             appearance.setReasonCaption("Razão: ");
             appearance.setLocationCaption("Localização: ");
 
-            SignatureContainer signatureContainer = new SignatureContainer(pkcs7);
+            SignatureContainer signatureContainer = new SignatureContainer(code, this.getTokenService, this.assinarPKCS7Service);
 
             appearance
                     .setReason("SIGN.GOV.BR")

@@ -1,5 +1,8 @@
 package com.esp.govbrsignatureintegration.signature;
 
+import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.esp.govbrsignatureintegration.services.GetTokenService;
+import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.signatures.IExternalSignatureContainer;
@@ -13,30 +16,34 @@ import java.security.GeneralSecurityException;
 
 public class SignatureContainer implements IExternalSignatureContainer {
 
-    private byte[] pkcs7;
+    private String code;
 
-    /*
-    TODO: acho que encontrei o probelma
-    Estou gerando o hash no momento errado
-    preciso ajustar para o hash ser criado dendo do método sign dessa classe
-     */
+    private GetTokenService getTokenService;
 
+    private AssinarPKCS7Service assinarPKCS7Service;
 
-    public SignatureContainer(byte[] pkcs7) {
-        this.pkcs7 = pkcs7;
+    public SignatureContainer(String code, GetTokenService getTokenService, AssinarPKCS7Service assinarPKCS7Service) {
+        this.code = code;
+        this.getTokenService = getTokenService;
+        this.assinarPKCS7Service = assinarPKCS7Service;
     }
 
     @Override
     public byte[] sign(InputStream data) {
         try {
+            String token = this.getTokenService.getToken(code);
 
+            // Gerando o hash do documento preparado
+            String hashBase64 = Util.generateHashSHA256(data);
 
+            byte[] pkcs7 = this.assinarPKCS7Service.getAssinaturaPKC7(token, hashBase64);
 
-            data.read(this.pkcs7);
+            return pkcs7;
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return this.pkcs7;
     }
 
     @Override
