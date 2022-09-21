@@ -1,5 +1,8 @@
 package com.esp.govbrsignatureintegration.models;
 
+/**
+ * Model de retorno da resquest de {@link com.esp.govbrsignatureintegration.services.GetTokenService}.
+ */
 public class GetTokenReturnModel {
     private String access_token;
     private String token_type;

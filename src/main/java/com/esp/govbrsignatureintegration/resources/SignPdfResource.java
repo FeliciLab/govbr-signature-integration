@@ -37,9 +37,10 @@ public class SignPdfResource {
     private ImageData govbrImageData;
 
     /**
+     * Rota para assinar um documento PDF.
      *
-     * @param code
-     * @param pdf
+     * @param code {@link String} que é passada na rota como variável
+     * @param pdf {@link MultipartFile} do arquivo
      * @return
      */
     @PostMapping("/{code}")
