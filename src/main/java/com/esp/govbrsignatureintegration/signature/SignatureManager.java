@@ -6,6 +6,8 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.PdfSignatureAppearance;
 import com.itextpdf.signatures.PdfSigner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,6 +15,8 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 public class SignatureManager {
+    private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
+
     private static final int ESTIMATED_SIZE = 8192; // Tamanho estimado da assinatura.
     private String token; // token para assinar o documento
     private AssinarPKCS7Service assinarPKCS7Service; // webcliente para fazer a request
@@ -24,6 +28,8 @@ public class SignatureManager {
 
     // Usado para gerar os bytes de um arquivo assinado
     public byte[] getBytesPdfSigned(InputStream pdfInputStream) throws IOException, GeneralSecurityException {
+        logger.info("getBytesPdfSigned | init");
+
         PdfReader pdfReader = new PdfReader(pdfInputStream);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -40,6 +46,8 @@ public class SignatureManager {
 
         byte[] outputBytes = byteArrayOutputStream.toByteArray();
 
+        logger.info("getBytesPdfSigned | final");
+
         return outputBytes;
     }
 
@@ -48,8 +56,11 @@ public class SignatureManager {
         appearance.setReasonCaption("Razão: ");
         appearance.setLocationCaption("Localização: ");
 
-        Rectangle rectangle = new Rectangle(320, 150, 100, 50);
+        Rectangle rectangle = new Rectangle(350, 150, 150, 50);
 
-        appearance.setReason("SIGN.GOV.BR").setLocation("ESP").setPageRect(rectangle).setPageNumber(1);
+        appearance.setReason("SIGN.GOV.BR")
+                .setLocation("ESP")
+                .setPageRect(rectangle)
+                .setPageNumber(1);
     }
 }

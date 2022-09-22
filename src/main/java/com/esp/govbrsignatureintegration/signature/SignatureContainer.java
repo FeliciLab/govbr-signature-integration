@@ -1,10 +1,13 @@
 package com.esp.govbrsignatureintegration.signature;
 
+import com.esp.govbrsignatureintegration.resources.SignPdfResource;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.signatures.IExternalSignatureContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +19,8 @@ import java.security.GeneralSecurityException;
  * Classe que encapsula o processo de assinatura de um documento pdf com a api do gov.br
  */
 public class SignatureContainer implements IExternalSignatureContainer {
+    private static final Logger logger = LoggerFactory.getLogger(SignatureContainer.class);
+
     private String token;
     private AssinarPKCS7Service assinarPKCS7Service;
 
@@ -29,6 +34,8 @@ public class SignatureContainer implements IExternalSignatureContainer {
         try {
             // Gerando o hash do documento preparado
             String hashBase64 = Util.generateHashSHA256(data);
+
+            logger.info("sign | hashBase64: {}", hashBase64);
 
             byte[] pkcs7 = this.assinarPKCS7Service.getAssinaturaPKC7(token, hashBase64);
 

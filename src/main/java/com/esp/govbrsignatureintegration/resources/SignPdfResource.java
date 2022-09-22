@@ -4,6 +4,8 @@ import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
 import com.esp.govbrsignatureintegration.signature.SignatureManager;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +23,8 @@ import java.util.zip.ZipOutputStream;
 @RestController
 @RequestMapping("/signPdf")
 public class SignPdfResource {
+    private static final Logger logger = LoggerFactory.getLogger(SignPdfResource.class);
+
     @Autowired
     private GetTokenService getTokenService;
 
@@ -36,7 +40,7 @@ public class SignPdfResource {
      */
     @PostMapping(value = "/{code}", produces = "application/pdf")
     public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
-        log.info("uploadFilesToSign", code, pdf.getOriginalFilename());
+        logger.info("uploadFilesToSign | code: {}", code);
 
         try {
             String token = this.getTokenService.getToken(code);
@@ -64,7 +68,7 @@ public class SignPdfResource {
      */
     @PostMapping(value = "/lote/{code}", produces = "application/zip")
     public ResponseEntity<InputStreamResource> uploadFilesToSignInLote(@PathVariable String code, @RequestParam MultipartFile[] pdfs) {
-        log.info("uploadFilesToSignInLote", code, Arrays.stream(pdfs).map(MultipartFile::getOriginalFilename));
+        logger.info("uploadFilesToSignInLote | code: {}", code);
 
         ByteArrayOutputStream zipByteArrayOutputStream = new ByteArrayOutputStream();
 
