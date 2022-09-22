@@ -13,9 +13,9 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 
 public class SignatureManager {
-    private String token;
-
-    private AssinarPKCS7Service assinarPKCS7Service;
+    private static final int ESTIMATED_SIZE = 8192; // Tamanho estimado da assinatura.
+    private String token; // token para assinar o documento
+    private AssinarPKCS7Service assinarPKCS7Service; // webcliente para fazer a request
 
     public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service) {
         this.token = token;
@@ -30,26 +30,28 @@ public class SignatureManager {
 
         PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
 
-        Rectangle rectangle = new Rectangle(320, 150, 100, 50);
+        SignatureContainer signatureContainer = new SignatureContainer(this.token, this.assinarPKCS7Service);
 
-        PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+        this.buildAppearence(pdfSigner.getSignatureAppearance());
 
+        pdfSigner.setFieldName("Sig");
+
+        pdfSigner.signExternalContainer(signatureContainer, ESTIMATED_SIZE);
+
+        byte[] outputBytes = byteArrayOutputStream.toByteArray();
+
+        return outputBytes;
+    }
+
+    private void buildAppearence(PdfSignatureAppearance appearance) {
         // appearance.setImage(this.govbrImageData);
 
         // Mudando as Captions
         appearance.setReasonCaption("Razão: ");
         appearance.setLocationCaption("Localização: ");
 
-        SignatureContainer signatureContainer = new SignatureContainer(this.token, this.assinarPKCS7Service);
+        Rectangle rectangle = new Rectangle(320, 150, 100, 50);
 
         appearance.setReason("SIGN.GOV.BR").setLocation("ESP").setPageRect(rectangle).setPageNumber(1);
-
-        pdfSigner.setFieldName("Sig");
-
-        pdfSigner.signExternalContainer(signatureContainer, 8192);
-
-        byte[] outputBytes = byteArrayOutputStream.toByteArray();
-
-        return outputBytes;
     }
 }

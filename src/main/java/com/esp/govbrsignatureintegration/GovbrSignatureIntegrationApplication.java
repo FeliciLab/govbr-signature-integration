@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class GovbrSignatureIntegrationApplication {
-
     @GetMapping("/")
     public String index(@RequestParam("code") String code){
         return code;

@@ -4,7 +4,7 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
-data:
+govbr:
   redirectUri: http://localhost:8080/
   clientId: devLocal
   secret: younIrtyij3

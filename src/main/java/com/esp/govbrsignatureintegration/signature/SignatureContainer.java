@@ -17,7 +17,6 @@ import java.security.GeneralSecurityException;
  */
 public class SignatureContainer implements IExternalSignatureContainer {
     private String token;
-
     private AssinarPKCS7Service assinarPKCS7Service;
 
     public SignatureContainer(String token, AssinarPKCS7Service assinarPKCS7Service) {

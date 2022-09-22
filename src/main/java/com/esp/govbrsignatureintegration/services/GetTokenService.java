@@ -10,13 +10,13 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class GetTokenService {
-    @Value("${data.redirectUri}")
+    @Value("${govbr.redirectUri}")
     private String redirectUri;
 
-    @Value("${data.clientId}")
+    @Value("${govbr.clientId}")
     private String clientId;
 
-    @Value("${data.secret}")
+    @Value("${govbr.secret}")
     private String secret;
     @Autowired
     private WebClient webClientOauth;

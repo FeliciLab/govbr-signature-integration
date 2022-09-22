@@ -10,10 +10,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientsConfig {
-    @Value("${data.servidorOauth}")
+    @Value("${govbr.servidorOauth}")
     private String servidorOauth;
 
-    @Value("${data.assinaturaApiUri}")
+    @Value("${govbr.assinaturaApiUri}")
     private String assinaturaApiUri;
 
     @Bean
