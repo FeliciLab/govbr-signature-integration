@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 
 @Configuration
 public class GovbrConfigs {
-
     @Bean
     public ImageData govbrImageData() throws MalformedURLException {
         ImageData imageData = ImageDataFactory.create("./assets/gov-br-logo.png");

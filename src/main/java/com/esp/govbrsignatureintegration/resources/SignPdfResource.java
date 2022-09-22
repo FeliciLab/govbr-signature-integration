@@ -3,6 +3,7 @@ package com.esp.govbrsignatureintegration.resources;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
 import com.esp.govbrsignatureintegration.signature.SignatureContainer;
+import com.esp.govbrsignatureintegration.signature.SignatureManager;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -31,9 +32,6 @@ public class SignPdfResource {
     @Autowired
     private AssinarPKCS7Service assinarPKCS7Service;
 
-    @Autowired
-    private ImageData govbrImageData;
-
     /**
      * Rota para assinar um documento PDF.
      *
@@ -46,37 +44,9 @@ public class SignPdfResource {
         try {
             String token = this.getTokenService.getToken(code);
 
-            // TODO: encapsular a lógica de assinar um documento em uma classe
+            SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
 
-            PdfReader pdfReader = new PdfReader(pdf.getInputStream());
-
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-            PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
-
-            Rectangle rectangle = new Rectangle(320, 150, 100, 50);
-
-            PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
-
-            // appearance.setImage(this.govbrImageData);
-
-            // Mudando as Captions
-            appearance.setReasonCaption("Razão: ");
-            appearance.setLocationCaption("Localização: ");
-
-            SignatureContainer signatureContainer = new SignatureContainer(token, this.assinarPKCS7Service);
-
-            appearance
-                    .setReason("SIGN.GOV.BR")
-                    .setLocation("ESP")
-                    .setPageRect(rectangle)
-                    .setPageNumber(1);
-
-            pdfSigner.setFieldName("Sig");
-
-            pdfSigner.signExternalContainer(signatureContainer, 8192);
-
-            byte[] outputBytes = byteArrayOutputStream.toByteArray();
+            byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
             HttpHeaders headers = new HttpHeaders();
 
@@ -110,36 +80,10 @@ public class SignPdfResource {
         try {
             String token = this.getTokenService.getToken(code);
 
+            SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
+
             for (MultipartFile pdf: pdfs) {
-                PdfReader pdfReader = new PdfReader(pdf.getInputStream());
-
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                PdfSigner pdfSigner = new PdfSigner(pdfReader, byteArrayOutputStream, new StampingProperties());
-
-                Rectangle rectangle = new Rectangle(320, 150, 100, 50);
-
-                PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
-
-                // appearance.setImage(this.govbrImageData);
-
-                // Mudando as Captions
-                appearance.setReasonCaption("Razão: ");
-                appearance.setLocationCaption("Localização: ");
-
-                SignatureContainer signatureContainer = new SignatureContainer(token, this.assinarPKCS7Service);
-
-                appearance
-                        .setReason("SIGN.GOV.BR")
-                        .setLocation("ESP")
-                        .setPageRect(rectangle)
-                        .setPageNumber(1);
-
-                pdfSigner.setFieldName("Sig");
-
-                pdfSigner.signExternalContainer(signatureContainer, 8192);
-
-                byte[] outputBytes = byteArrayOutputStream.toByteArray();
+                byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
                 InputStream inputStream = new ByteArrayInputStream(outputBytes);
 

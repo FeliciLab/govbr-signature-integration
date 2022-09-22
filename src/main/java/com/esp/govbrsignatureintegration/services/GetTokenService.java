@@ -8,12 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-/**
- * TODO: escrever documentação aqui
- */
 @Service
 public class GetTokenService {
-
     @Value("${data.redirectUri}")
     private String redirectUri;
 

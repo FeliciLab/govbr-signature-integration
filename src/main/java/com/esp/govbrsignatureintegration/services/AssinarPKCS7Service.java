@@ -18,13 +18,6 @@ public class AssinarPKCS7Service {
     @Autowired
     private WebClient webClientAssinatura;
 
-    /**
-     * TODO: Estou com problema aqui
-     *
-     * @param token
-     * @param hashBase64
-     * @return
-     */
     public byte[] getAssinaturaPKC7(String token, String hashBase64) {
         String authorization = "Bearer " + token;
 

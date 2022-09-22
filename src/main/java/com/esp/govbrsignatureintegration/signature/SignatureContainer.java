@@ -5,6 +5,8 @@ import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.signatures.IExternalSignatureContainer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,13 +20,6 @@ public class SignatureContainer implements IExternalSignatureContainer {
 
     private AssinarPKCS7Service assinarPKCS7Service;
 
-    /**
-     * Construtor que revebe:
-     *
-     * @param token               {@link String} token de autenticação
-     * @param assinarPKCS7Service {@link AssinarPKCS7Service} responsável por enviar o hash na request e obter os bytes
-     *                            da assinatura.
-     */
     public SignatureContainer(String token, AssinarPKCS7Service assinarPKCS7Service) {
         this.token = token;
         this.assinarPKCS7Service = assinarPKCS7Service;
