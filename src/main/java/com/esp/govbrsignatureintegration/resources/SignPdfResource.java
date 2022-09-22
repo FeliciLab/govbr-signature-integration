@@ -120,7 +120,6 @@ public class SignPdfResource {
         return ResponseEntity
                 .ok()
                 .headers(headers)
-                .contentType(MediaType.APPLICATION_PDF)
                 .body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
     }
 }
