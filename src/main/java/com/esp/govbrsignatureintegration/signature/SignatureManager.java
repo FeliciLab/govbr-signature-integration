@@ -44,8 +44,6 @@ public class SignatureManager {
     }
 
     private void buildAppearence(PdfSignatureAppearance appearance) {
-        // appearance.setImage(this.govbrImageData);
-
         // Mudando as Captions
         appearance.setReasonCaption("Razão: ");
         appearance.setLocationCaption("Localização: ");

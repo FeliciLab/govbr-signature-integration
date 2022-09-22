@@ -22,7 +22,9 @@ public class AssinarPKCS7Service {
         String authorization = "Bearer " + token;
 
         try {
-            Flux<DataBuffer> dataBuffer = webClientAssinatura.post().uri("/assinarPKCS7")
+            Flux<DataBuffer> dataBuffer = webClientAssinatura
+                    .post()
+                    .uri("/assinarPKCS7")
                     .header("Authorization", authorization)
                     .bodyValue("{\"hashBase64\": \"" + hashBase64 + "\"}")
                     .retrieve()

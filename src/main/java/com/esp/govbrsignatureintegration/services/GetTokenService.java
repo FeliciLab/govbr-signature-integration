@@ -3,7 +3,6 @@ package com.esp.govbrsignatureintegration.services;
 import com.esp.govbrsignatureintegration.models.GetTokenReturnModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -22,8 +21,9 @@ public class GetTokenService {
     private WebClient webClientOauth;
 
     public String getToken(String code) {
-        Mono<GetTokenReturnModel> tokenReturnModelMono = this.webClientOauth.method(HttpMethod.POST).
-                uri(uriBuilder -> uriBuilder.path("/token")
+        Mono<GetTokenReturnModel> tokenReturnModelMono = this.webClientOauth
+                .post()
+                .uri(uriBuilder -> uriBuilder.path("/token")
                         .queryParam("code", code)
                         .queryParam("client_id", this.clientId)
                         .queryParam("grant_type", "authorization_code")

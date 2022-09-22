@@ -50,7 +50,11 @@ public class SignPdfResource {
 
             headers.add("Content-Disposition", "inline; filename=citiesreport.pdf");
 
-            return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
+            return ResponseEntity
+                    .ok()
+                    .headers(headers)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -113,6 +117,10 @@ public class SignPdfResource {
 
         headers.add("Content-Disposition", "inline; filename=citiesreport.zip");
 
-        return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
     }
 }
