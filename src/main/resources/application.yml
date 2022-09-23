@@ -3,10 +3,12 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+  config:
+    import: optional:file:.env[.properties]
 
 govbr:
-  redirectUri: http://localhost:8080/
-  clientId: devLocal
-  secret: younIrtyij3
-  servidorOauth: cas.staging.iti.br/oauth2.0
-  assinaturaApiUri: https://assinatura-api.staging.iti.br/externo/v2/
+  redirectUri: ${REDIRECT_URI}
+  clientId: ${CLIENT_ID}
+  secret: ${SECRET}
+  servidorOauth: ${SERVIDOR_OAUTH}
+  assinaturaApiUri: ${ASSINATURA_API_URI}
