@@ -58,9 +58,6 @@ public class SignatureManager {
 
         Rectangle rectangle = new Rectangle(350, 150, 150, 50);
 
-        appearance.setReason("SIGN.GOV.BR")
-                .setLocation("ESP")
-                .setPageRect(rectangle)
-                .setPageNumber(1);
+        appearance.setReason("SIGN.GOV.BR").setLocation("ESP").setPageRect(rectangle).setPageNumber(1);
     }
 }

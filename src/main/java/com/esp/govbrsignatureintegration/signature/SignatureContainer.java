@@ -1,6 +1,5 @@
 package com.esp.govbrsignatureintegration.signature;
 
-import com.esp.govbrsignatureintegration.resources.SignPdfResource;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.kernel.pdf.PdfDictionary;
@@ -8,8 +7,6 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.signatures.IExternalSignatureContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;

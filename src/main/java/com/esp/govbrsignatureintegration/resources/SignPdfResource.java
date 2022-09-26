@@ -8,14 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -41,7 +42,6 @@ public class SignPdfResource {
     @PostMapping(value = "/{code}", produces = "application/pdf")
     public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
         logger.info("uploadFilesToSign | code: {}", code);
-
         try {
             String token = this.getTokenService.getToken(code);
 
@@ -49,13 +49,13 @@ public class SignPdfResource {
 
             byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
-            HttpHeaders headers = new HttpHeaders();
-
             return ResponseEntity.ok().body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de assinatura digital");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de I/O");
+        } catch (WebClientResponseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getStatusText());
         }
     }
 
@@ -63,7 +63,7 @@ public class SignPdfResource {
      * Rota para assinar um documentos PDF em Lote.
      *
      * @param code {@link String} que é passada na rota como variável.
-     * @param pdf  {@link MultipartFile} do arquivo.
+     * @param pdfs Array de {@link MultipartFile} dos arquivos.
      * @return Retorna um arquivo zip com os documentos assinados.
      */
     @PostMapping(value = "/lote/{code}", produces = "application/zip")
@@ -97,15 +97,15 @@ public class SignPdfResource {
                 }
 
                 zipOutputStream.closeEntry();
-
                 inputStream.close();
             }
-
             zipOutputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de assinatura digital");
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de I/O");
+        } catch (WebClientResponseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getStatusText());
         }
 
         byte[] outputBytes = zipByteArrayOutputStream.toByteArray();
