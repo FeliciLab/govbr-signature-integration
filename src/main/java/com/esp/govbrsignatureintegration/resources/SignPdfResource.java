@@ -8,12 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
@@ -40,23 +37,16 @@ public class SignPdfResource {
      * @return um arquivo pdf assinado.
      */
     @PostMapping(value = "/{code}", produces = "application/pdf")
-    public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) {
+    public ResponseEntity<InputStreamResource> uploadFilesToSign(@PathVariable String code, @RequestParam MultipartFile pdf) throws IOException, GeneralSecurityException {
         logger.info("uploadFilesToSign | code: {}", code);
-        try {
-            String token = this.getTokenService.getToken(code);
 
-            SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
+        String token = this.getTokenService.getToken(code);
 
-            byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
 
-            return ResponseEntity.ok().body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
-        } catch (GeneralSecurityException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de assinatura digital");
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de I/O");
-        } catch (WebClientResponseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getStatusText());
-        }
+        byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
+
+        return ResponseEntity.ok().body(new InputStreamResource(new ByteArrayInputStream(outputBytes)));
     }
 
     /**
@@ -67,46 +57,38 @@ public class SignPdfResource {
      * @return Retorna um arquivo zip com os documentos assinados.
      */
     @PostMapping(value = "/lote/{code}", produces = "application/zip")
-    public ResponseEntity<InputStreamResource> uploadFilesToSignInLote(@PathVariable String code, @RequestParam MultipartFile[] pdfs) {
+    public ResponseEntity<InputStreamResource> uploadFilesToSignInLote(@PathVariable String code, @RequestParam MultipartFile[] pdfs) throws IOException, GeneralSecurityException {
         logger.info("uploadFilesToSignInLote | code: {}", code);
 
         ByteArrayOutputStream zipByteArrayOutputStream = new ByteArrayOutputStream();
 
         ZipOutputStream zipOutputStream = new ZipOutputStream(zipByteArrayOutputStream);
 
-        try {
-            String token = this.getTokenService.getToken(code);
+        String token = this.getTokenService.getToken(code);
 
-            SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
 
-            for (MultipartFile pdf : pdfs) {
-                byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
+        for (MultipartFile pdf : pdfs) {
+            byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
-                InputStream inputStream = new ByteArrayInputStream(outputBytes);
+            InputStream inputStream = new ByteArrayInputStream(outputBytes);
 
-                ZipEntry zipEntry = new ZipEntry(pdf.getOriginalFilename());
+            ZipEntry zipEntry = new ZipEntry(pdf.getOriginalFilename());
 
-                zipOutputStream.putNextEntry(zipEntry);
+            zipOutputStream.putNextEntry(zipEntry);
 
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-                byte[] bytes = new byte[1024];
-                int length;
-                while ((length = inputStream.read(bytes)) >= 0) {
-                    zipOutputStream.write(bytes, 0, length);
-                }
-
-                zipOutputStream.closeEntry();
-                inputStream.close();
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = inputStream.read(bytes)) >= 0) {
+                zipOutputStream.write(bytes, 0, length);
             }
-            zipOutputStream.close();
-        } catch (GeneralSecurityException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de assinatura digital");
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro de I/O");
-        } catch (WebClientResponseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getStatusText());
+
+            zipOutputStream.closeEntry();
+            inputStream.close();
         }
+        zipOutputStream.close();
 
         byte[] outputBytes = zipByteArrayOutputStream.toByteArray();
 
