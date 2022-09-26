@@ -24,37 +24,37 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(WebClientResponseException.class)
     public ResponseEntity handleWebClientResponseException(Exception exception) {
-        logger.info("handleException {}", exception.getMessage());
+        logger.info("AppExceptionHandler | {}", exception.getMessage());
 
         Map<String, Object> responseEntityBody  = new HashMap<>();
 
-        responseEntityBody.put("message", exception.getMessage());
-        responseEntityBody.put("status", HttpStatus.BAD_GATEWAY);
+        responseEntityBody.put("message", "Erro no processamento com o gov.br");
+        responseEntityBody.put("status", HttpStatus.UNAUTHORIZED);
 
-        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity(responseEntityBody, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(GeneralSecurityException.class)
     public ResponseEntity handleGeneralSecurityException(Exception exception) {
-        logger.info("handleException {}", exception.getMessage());
+        logger.info("AppExceptionHandler | {}", exception.getMessage());
 
         Map<String, Object> responseEntityBody  = new HashMap<>();
 
-        responseEntityBody.put("message", exception.getMessage());
-        responseEntityBody.put("status", HttpStatus.BAD_GATEWAY);
+        responseEntityBody.put("message", "Erro no processamento da assinatura digital.");
+        responseEntityBody.put("status", HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity handleIOException(Exception exception) {
-        logger.info("handleException {}", exception.getMessage());
+        logger.info("AppExceptionHandler | {}", exception.getMessage());
 
         Map<String, Object> responseEntityBody  = new HashMap<>();
 
-        responseEntityBody.put("message", exception.getMessage());
-        responseEntityBody.put("status", HttpStatus.BAD_GATEWAY);
+        responseEntityBody.put("message", "Erro no processamento dos dados.");
+        responseEntityBody.put("status", HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_GATEWAY);
+        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_REQUEST);
     }
 }
