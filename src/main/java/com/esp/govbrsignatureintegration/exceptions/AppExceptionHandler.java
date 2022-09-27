@@ -23,7 +23,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
     @ExceptionHandler(WebClientResponseException.class)
-    public ResponseEntity handleWebClientResponseException(Exception exception) {
+    public ResponseEntity handleWebClientResponseException(WebClientResponseException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
         Map<String, Object> responseEntityBody  = new HashMap<>();
@@ -35,7 +35,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(GeneralSecurityException.class)
-    public ResponseEntity handleGeneralSecurityException(Exception exception) {
+    public ResponseEntity handleGeneralSecurityException(GeneralSecurityException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
         Map<String, Object> responseEntityBody  = new HashMap<>();
@@ -47,7 +47,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity handleIOException(Exception exception) {
+    public ResponseEntity handleIOException(IOException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
         Map<String, Object> responseEntityBody  = new HashMap<>();
