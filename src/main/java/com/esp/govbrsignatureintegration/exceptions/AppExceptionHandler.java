@@ -1,6 +1,5 @@
 package com.esp.govbrsignatureintegration.exceptions;
 
-import com.esp.govbrsignatureintegration.resources.SignPdfResource;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity handleWebClientResponseException(WebClientResponseException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
-        Map<String, Object> responseEntityBody  = new HashMap<>();
+        Map<String, Object> responseEntityBody = new HashMap<>();
 
         responseEntityBody.put("message", "Erro no processamento com o gov.br");
         responseEntityBody.put("status", HttpStatus.UNAUTHORIZED);
@@ -38,7 +37,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity handleGeneralSecurityException(GeneralSecurityException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
-        Map<String, Object> responseEntityBody  = new HashMap<>();
+        Map<String, Object> responseEntityBody = new HashMap<>();
 
         responseEntityBody.put("message", "Erro no processamento da assinatura digital.");
         responseEntityBody.put("status", HttpStatus.BAD_REQUEST);
@@ -50,7 +49,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity handleIOException(IOException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
-        Map<String, Object> responseEntityBody  = new HashMap<>();
+        Map<String, Object> responseEntityBody = new HashMap<>();
 
         responseEntityBody.put("message", "Erro no processamento dos dados.");
         responseEntityBody.put("status", HttpStatus.BAD_REQUEST);
