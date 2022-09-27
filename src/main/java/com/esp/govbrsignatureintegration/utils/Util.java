@@ -34,4 +34,17 @@ public class Util {
 
         return Base64.getEncoder().encodeToString(documentHash);
     }
+
+    /**
+     * Gerar a URL para acessar o gov.br para obter o code.
+     *
+     * @param servidorOauth servidor Oauth2.0.
+     * @param redirectUri   uri de redirecionamento.
+     * @param scope         determina se é em uma assinatura normal ou em lote (sgin para único arquivo e signature_session para arquivos em lote).
+     * @param clientId      identificador do cliente.
+     * @return @{@link String} para a URL do gov.br.
+     */
+    public static String getUrlGovbr(String servidorOauth, String redirectUri, String scope, String clientId) {
+        return String.format("https://%/authorize?response_type=code&redirect_uri=%&scope=%&client_id=%", servidorOauth, redirectUri, scope, clientId);
+    }
 }
