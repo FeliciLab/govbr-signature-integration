@@ -5,7 +5,8 @@ spring:
       max-request-size: 100MB
   config:
     import: optional:file:.env[.properties]
-
+server:
+  port : ${SERVER_PORT}
 govbr:
   redirectUri: ${REDIRECT_URI}
   clientId: ${CLIENT_ID}
