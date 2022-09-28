@@ -1,6 +1,8 @@
 package com.esp.govbrsignatureintegration.signature;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 
 public class SignatureManager {
@@ -38,7 +41,10 @@ public class SignatureManager {
 
         SignatureContainer signatureContainer = new SignatureContainer(this.token, this.assinarPKCS7Service);
 
-        this.buildAppearence(pdfSigner.getSignatureAppearance());
+        // Pegando as pegar as dimensões de uma página A4 rotacionada
+        Rectangle pageDimensions = PageSize.A4.rotate();
+
+        this.buildAppearence(pdfSigner.getSignatureAppearance(), pageDimensions);
 
         pdfSigner.setFieldName("Sig");
 
@@ -51,13 +57,31 @@ public class SignatureManager {
         return outputBytes;
     }
 
-    private void buildAppearence(PdfSignatureAppearance appearance) {
-        // Mudando as Captions
-        appearance.setReasonCaption("Razão: ");
-        appearance.setLocationCaption("Localização: ");
+    private void buildAppearence(PdfSignatureAppearance appearance, Rectangle pageDimensions) throws MalformedURLException {
+        logger.info("buildAppearence | init");
 
-        Rectangle rectangle = new Rectangle(350, 150, 150, 50);
+        float pageWidth = pageDimensions.getWidth();
 
-        appearance.setReason("SIGN.GOV.BR").setLocation("ESP").setPageRect(rectangle).setPageNumber(1);
+        float rectangleWidth = 250f;
+        float rectangleHeigth = 60f;
+
+        float rectangleX = (pageWidth - rectangleWidth) / 2;
+        float rectangleY = rectangleHeigth + 90f;
+
+        Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
+
+        appearance
+                .setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
+                .setReasonCaption("Razão: ") //
+                .setLocationCaption("Localização: ") //
+                .setContact("Contato") //
+                .setSignatureCreator("Dr. Marcelo") //
+                .setReason("ESP - Escola de saúde pública do Ceará") //
+                .setLocation("Fortaleza - CE") //
+                .setSignatureGraphic(ImageDataFactory.create("./assets/gov-br-logo.png")) //
+                .setPageRect(rectangle) //
+                .setPageNumber(1);
+
+        logger.info("buildAppearence | init");
     }
 }

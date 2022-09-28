@@ -45,6 +45,6 @@ public class Util {
      * @return @{@link String} para a URL do gov.br.
      */
     public static String getUrlGovbr(String servidorOauth, String redirectUri, String scope, String clientId) {
-        return String.format("https://%/authorize?response_type=code&redirect_uri=%&scope=%&client_id=%", servidorOauth, redirectUri, scope, clientId);
+        return String.format("https://%s/authorize?response_type=code&redirect_uri=%s&scope=%s&client_id=%s", servidorOauth, redirectUri, scope, clientId);
     }
 }
