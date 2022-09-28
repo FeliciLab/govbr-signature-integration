@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
+import java.util.Calendar;
 
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
@@ -41,12 +42,13 @@ public class SignatureManager {
 
         SignatureContainer signatureContainer = new SignatureContainer(this.token, this.assinarPKCS7Service);
 
-        // Pegando as pegar as dimensões de uma página A4 rotacionada
-        Rectangle pageDimensions = PageSize.A4.rotate();
+        pdfSigner.setSignDate(Calendar.getInstance());
 
-        this.buildAppearence(pdfSigner.getSignatureAppearance(), pageDimensions);
+        pdfSigner.setFieldName("Marcelo Alcantra Holada");
 
-        pdfSigner.setFieldName("Sig");
+        PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
+
+        buildAppearence(appearance);
 
         pdfSigner.signExternalContainer(signatureContainer, ESTIMATED_SIZE);
 
@@ -57,8 +59,17 @@ public class SignatureManager {
         return outputBytes;
     }
 
-    private void buildAppearence(PdfSignatureAppearance appearance, Rectangle pageDimensions) throws MalformedURLException {
+    /**
+     * Construir a aparência da assinatura no pdf.
+     *
+     * @param appearance instância de @{@link PdfSignatureAppearance}
+     * @throws MalformedURLException
+     */
+    private void buildAppearence(PdfSignatureAppearance appearance) throws MalformedURLException {
         logger.info("buildAppearence | init");
+
+        // Dimensões de uma página A4 rotacionada
+        Rectangle pageDimensions = PageSize.A4.rotate();
 
         float pageWidth = pageDimensions.getWidth();
 
@@ -72,14 +83,14 @@ public class SignatureManager {
 
         appearance
                 .setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
-                .setReasonCaption("Razão: ") //
-                .setLocationCaption("Localização: ") //
-                .setContact("Contato") //
-                .setSignatureCreator("Dr. Marcelo") //
-                .setReason("ESP - Escola de saúde pública do Ceará") //
-                .setLocation("Fortaleza - CE") //
-                .setSignatureGraphic(ImageDataFactory.create("./assets/gov-br-logo.png")) //
-                .setPageRect(rectangle) //
+                .setReasonCaption("Razão: ") // Caption da razão
+                .setLocationCaption("Localização: ") // Caption da localização
+                .setContact("Contato") // contato
+                .setReason("ESP - Escola de saúde pública do Ceará") // Razão
+                .setLocation("Fortaleza - CE") // localização
+                .setSignatureCreator("govbr-signature-integration") // nome da aplicação
+                .setSignatureGraphic(ImageDataFactory.create("./assets/gov-br-logo.png")) // Imagem lateral da assinatura
+                .setPageRect(rectangle)
                 .setPageNumber(1);
 
         logger.info("buildAppearence | init");
