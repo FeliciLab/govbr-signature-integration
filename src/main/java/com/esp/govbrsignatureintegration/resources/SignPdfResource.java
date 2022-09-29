@@ -19,6 +19,7 @@ import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/signPdf")
 public class SignPdfResource {
     private static final Logger logger = LoggerFactory.getLogger(SignPdfResource.class);
