@@ -40,6 +40,16 @@ public class AppExceptionHandler {
         return errorMessage;
     }
 
+    @ExceptionHandler(ImproperDigitalIdentityLevelException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage handleImproperDigitalIdentityLevelException(ImproperDigitalIdentityLevelException exception) {
+        ErrorMessage errorMessage = exception.getErrorMessage();
+
+        logger.info("ImproperDigitalIdentityLevelException | {}", errorMessage.getMessage());
+
+        return errorMessage;
+    }
+
     @ExceptionHandler(GeneralSecurityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleGeneralSecurityException(GeneralSecurityException exception) {

@@ -1,5 +1,7 @@
 package com.esp.govbrsignatureintegration.signature;
 
+import com.esp.govbrsignatureintegration.exceptions.ErrorMessage;
+import com.esp.govbrsignatureintegration.exceptions.ImproperDigitalIdentityLevelException;
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.kernel.pdf.PdfDictionary;
@@ -7,10 +9,13 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.signatures.IExternalSignatureContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Date;
 
 /**
  * Classe que encapsula o processo de assinatura de um documento pdf com a api do gov.br
@@ -38,6 +43,13 @@ public class SignatureContainer implements IExternalSignatureContainer {
 
             // Aqui vai os bytes que serão colocados em hexadecimal no documento
             return pkcs7;
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+                ErrorMessage errorMessage = new ErrorMessage(new Date(), e.getResponseBodyAsString(), "É necessário possuir conta gov.br nível ouro ou prata para utilizar a assinatura eletrônica digital.");
+                throw new ImproperDigitalIdentityLevelException(errorMessage);
+            } else {
+                throw new RuntimeException(e);
+            }
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
