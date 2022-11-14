@@ -1,16 +1,22 @@
 package com.esp.govbrsignatureintegration.signature;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.signatures.PdfSignatureAppearance;
 import com.itextpdf.signatures.PdfSigner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +40,7 @@ public class SignatureManager {
     public byte[] getBytesPdfSigned(InputStream pdfInputStream) throws IOException, GeneralSecurityException {
         logger.info("getBytesPdfSigned | init");
 
-        PdfReader pdfReader = new PdfReader(pdfInputStream);
+        PdfReader pdfReader = addImages(pdfInputStream);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -44,7 +50,7 @@ public class SignatureManager {
 
         pdfSigner.setSignDate(Calendar.getInstance());
 
-        pdfSigner.setFieldName("Marcelo Alcantra Holada");
+        pdfSigner.setFieldName("Marcelo Alcantara Holanda");
 
         PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
 
@@ -57,6 +63,27 @@ public class SignatureManager {
         logger.info("getBytesPdfSigned | final");
 
         return outputBytes;
+    }
+
+    private PdfReader addImages(InputStream pdfInputStream) throws IOException {
+        ByteArrayOutputStream baosOfOutput = new ByteArrayOutputStream();
+        PdfDocument pdfDoc = new PdfDocument(new PdfReader(pdfInputStream), new PdfWriter(baosOfOutput));
+        Document document = new Document(pdfDoc);
+
+        // Dimensões de uma página A4 rotacionada
+        Rectangle pageDimensions = PageSize.A4.rotate();
+        float pageWidth = pageDimensions.getWidth();
+        float pageHeight = pageDimensions.getHeight();
+
+        // Adiciona imagem QRcode
+        ImageData imageData = ImageDataFactory.create("./assets/qrcode-HML.png");
+        Image imgQRcode = new Image(imageData).setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
+        document.add(imgQRcode);
+        document.close();
+
+        InputStream in = new ByteArrayInputStream(baosOfOutput.toByteArray());
+        PdfReader pdfReader = new PdfReader(in);
+        return pdfReader;
     }
 
     /**
@@ -74,10 +101,10 @@ public class SignatureManager {
         float pageWidth = pageDimensions.getWidth();
 
         float rectangleWidth = 250f;
-        float rectangleHeigth = 60f;
+        float rectangleHeigth = 30f;
 
-        float rectangleX = (pageWidth - rectangleWidth) / 2;
-        float rectangleY = rectangleHeigth + 90f;
+        float rectangleX = (pageWidth - rectangleWidth - 90f) / 2;
+        float rectangleY = rectangleHeigth + 120f;
 
         Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
 
@@ -86,10 +113,10 @@ public class SignatureManager {
                 .setReasonCaption("Razão: ") // Caption da razão
                 .setLocationCaption("Localização: ") // Caption da localização
                 .setContact("Contato") // contato
-                .setReason("ESP - Escola de saúde pública do Ceará") // Razão
+                .setReason("ESP - Escola de Saúde Pública do Ceará") // Razão
                 .setLocation("Fortaleza - CE") // localização
                 .setSignatureCreator("govbr-signature-integration") // nome da aplicação
-                .setSignatureGraphic(ImageDataFactory.create("./assets/gov-br-logo.png")) // Imagem lateral da assinatura
+                .setSignatureGraphic(ImageDataFactory.create("./assets/rubrica.png")) // Imagem lateral da assinatura
                 .setPageRect(rectangle)
                 .setPageNumber(1);
 
