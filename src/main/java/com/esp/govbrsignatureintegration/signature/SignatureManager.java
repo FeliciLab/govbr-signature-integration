@@ -18,11 +18,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 import java.util.Calendar;
+
+import com.itextpdf.svg.converter.SvgConverter;;
 
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
@@ -76,8 +79,9 @@ public class SignatureManager {
         float pageHeight = pageDimensions.getHeight();
 
         // Adiciona imagem QRcode
-        ImageData imageData = ImageDataFactory.create("./assets/qrcode-HML.png");
-        Image imgQRcode = new Image(imageData).setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
+        Image imgQRcode = SvgConverter.convertToImage(new FileInputStream("./assets/qrcode-HML.svg"), pdfDoc)
+                            .setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
+        
         document.add(imgQRcode);
         document.close();
 
@@ -107,6 +111,8 @@ public class SignatureManager {
         float rectangleY = rectangleHeigth + 120f;
 
         Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
+
+        //Image imgQRcode = SvgConverter.convertToImage(new FileInputStream("./assets/rubrica.png"), pdfDoc)
 
         appearance
                 .setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
