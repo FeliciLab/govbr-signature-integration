@@ -1,7 +1,6 @@
 package com.esp.govbrsignatureintegration.signature;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
-import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -13,19 +12,16 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.signatures.PdfSignatureAppearance;
 import com.itextpdf.signatures.PdfSigner;
+import com.itextpdf.svg.converter.SvgConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 import java.util.Calendar;
 
-import com.itextpdf.svg.converter.SvgConverter;;
+;
 
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
@@ -55,9 +51,7 @@ public class SignatureManager {
 
         pdfSigner.setFieldName("Marcelo Alcantara Holanda");
 
-        PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
-
-        buildAppearence(appearance);
+        buildAppearence(pdfSigner);
 
         pdfSigner.signExternalContainer(signatureContainer, ESTIMATED_SIZE);
 
@@ -68,6 +62,13 @@ public class SignatureManager {
         return outputBytes;
     }
 
+    /**
+     * Adiciona imagens no documento.
+     *
+     * @param pdfInputStream
+     * @return
+     * @throws IOException
+     */
     private PdfReader addImages(InputStream pdfInputStream) throws IOException {
         ByteArrayOutputStream baosOfOutput = new ByteArrayOutputStream();
         PdfDocument pdfDoc = new PdfDocument(new PdfReader(pdfInputStream), new PdfWriter(baosOfOutput));
@@ -79,9 +80,8 @@ public class SignatureManager {
         float pageHeight = pageDimensions.getHeight();
 
         // Adiciona imagem QRcode
-        Image imgQRcode = SvgConverter.convertToImage(new FileInputStream("./assets/qrcode-HML.svg"), pdfDoc)
-                            .setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
-        
+        Image imgQRcode = SvgConverter.convertToImage(new FileInputStream("./assets/qrcode-HML.svg"), pdfDoc).setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
+
         document.add(imgQRcode);
         document.close();
 
@@ -96,8 +96,10 @@ public class SignatureManager {
      * @param appearance instância de @{@link PdfSignatureAppearance}
      * @throws MalformedURLException
      */
-    private void buildAppearence(PdfSignatureAppearance appearance) throws MalformedURLException {
+    private void buildAppearence(PdfSigner pdfSigner) throws IOException, MalformedURLException {
         logger.info("buildAppearence | init");
+
+        PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
 
         // Dimensões de uma página A4 rotacionada
         Rectangle pageDimensions = PageSize.A4.rotate();
@@ -112,10 +114,7 @@ public class SignatureManager {
 
         Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
 
-        //Image imgQRcode = SvgConverter.convertToImage(new FileInputStream("./assets/rubrica.png"), pdfDoc)
-
-        appearance
-                .setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
+        appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
                 .setReasonCaption("Razão: ") // Caption da razão
                 .setLocationCaption("Localização: ") // Caption da localização
                 .setContact("Contato") // contato
@@ -123,8 +122,7 @@ public class SignatureManager {
                 .setLocation("Fortaleza - CE") // localização
                 .setSignatureCreator("govbr-signature-integration") // nome da aplicação
                 .setSignatureGraphic(ImageDataFactory.create("./assets/rubrica.png")) // Imagem lateral da assinatura
-                .setPageRect(rectangle)
-                .setPageNumber(1);
+                .setPageRect(rectangle).setPageNumber(1);
 
         logger.info("buildAppearence | init");
     }
