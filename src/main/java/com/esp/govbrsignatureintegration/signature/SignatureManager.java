@@ -21,8 +21,6 @@ import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 import java.util.Calendar;
 
-;
-
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
 
