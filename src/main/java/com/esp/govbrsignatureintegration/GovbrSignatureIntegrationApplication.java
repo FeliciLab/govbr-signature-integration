@@ -24,6 +24,12 @@ public class GovbrSignatureIntegrationApplication {
     @Value("${govbr.secret}")
     private String secret;
 
+    @Value("${govbr.imgRubricSource}")
+    private String imgRubricSource;
+
+    @Value("${govbr.imgQRCodeSource}")
+    private String imgQRCodeSource;
+
     @GetMapping("/")
     public String index(@RequestParam(name = "code", required = false) String code) {
         if (code == null) {
