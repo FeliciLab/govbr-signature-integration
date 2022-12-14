@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,12 @@ public class SignPdfResource {
     @Autowired
     private AssinarPKCS7Service assinarPKCS7Service;
 
+    @Value("${govbr.imgRubricSource}")
+    private String imgRubricSource;
+
+    @Value("${govbr.imgQRCodeSource}")
+    private String imgQRCodeSource;
+
     /**
      * Rota para assinar um documento PDF.
      *
@@ -43,7 +50,7 @@ public class SignPdfResource {
 
         String token = this.getTokenService.getToken(code);
 
-        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgRubricSource, this.imgQRCodeSource);
 
         byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
@@ -67,7 +74,7 @@ public class SignPdfResource {
 
         String token = this.getTokenService.getToken(code);
 
-        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service);
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgRubricSource, this.imgQRCodeSource);
 
         for (MultipartFile pdf : pdfs) {
             byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());

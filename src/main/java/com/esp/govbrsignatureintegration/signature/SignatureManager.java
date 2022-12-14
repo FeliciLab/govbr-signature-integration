@@ -24,13 +24,19 @@ import java.util.Calendar;
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
 
+    private String imgRubricSource;
+
+    private String imgQRCodeSource;
+
     private static final int ESTIMATED_SIZE = 8192; // Tamanho estimado da assinatura.
     private String token; // token para assinar o documento
     private AssinarPKCS7Service assinarPKCS7Service; // webcliente para fazer a request
 
-    public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service) {
+    public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service, String imgRubricSource, String imgQRCodeSource) {
         this.token = token;
         this.assinarPKCS7Service = assinarPKCS7Service;
+        this.imgRubricSource = imgRubricSource;
+        this.imgQRCodeSource = imgQRCodeSource;
     }
 
     // Usado para gerar os bytes de um arquivo assinado
@@ -78,7 +84,7 @@ public class SignatureManager {
         float pageHeight = pageDimensions.getHeight();
 
         // Adiciona imagem QRcode
-        Image imgQRcode = SvgConverter.convertToImage(new FileInputStream("./assets/qrcode-HML.svg"), pdfDoc).setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
+        Image imgQRcode = SvgConverter.convertToImage(new FileInputStream(this.imgQRCodeSource), pdfDoc).setFixedPosition(1, pageWidth - 150f, pageHeight - 200f);
 
         document.add(imgQRcode);
         document.close();
@@ -119,7 +125,7 @@ public class SignatureManager {
                 .setReason("ESP - Escola de Saúde Pública do Ceará") // Razão
                 .setLocation("Fortaleza - CE") // localização
                 .setSignatureCreator("govbr-signature-integration") // nome da aplicação
-                .setSignatureGraphic(ImageDataFactory.create("./assets/rubrica.png")) // Imagem lateral da assinatura
+                .setSignatureGraphic(ImageDataFactory.create(this.imgRubricSource)) // Imagem lateral da assinatura
                 .setPageRect(rectangle).setPageNumber(1);
 
         logger.info("buildAppearence | init");
