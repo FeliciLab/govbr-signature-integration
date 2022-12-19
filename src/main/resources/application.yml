@@ -5,10 +5,13 @@ spring:
       max-request-size: 100MB
   config:
     import: optional:file:.env[.properties]
-
+server:
+  port : ${SERVER_PORT}
 govbr:
   redirectUri: ${REDIRECT_URI}
   clientId: ${CLIENT_ID}
   secret: ${SECRET}
   servidorOauth: ${SERVIDOR_OAUTH}
   assinaturaApiUri: ${ASSINATURA_API_URI}
+  imgRubricSource: ${IMG_RUBRIC_SOURCE}
+  imgQRCodeSource: ${IMG_QR_CODE_SOURCE}

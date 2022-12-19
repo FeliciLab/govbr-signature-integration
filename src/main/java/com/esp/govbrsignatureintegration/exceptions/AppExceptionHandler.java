@@ -4,56 +4,69 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 
 @Slf4j
-@ControllerAdvice
-public class AppExceptionHandler extends ResponseEntityExceptionHandler {
+@RestControllerAdvice
+public class AppExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
-    @ExceptionHandler(WebClientResponseException.class)
-    public ResponseEntity handleWebClientResponseException(WebClientResponseException exception) {
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorMessage handleAccessDeniedException(AccessDeniedException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
-        Map<String, Object> responseEntityBody = new HashMap<>();
+        ErrorMessage errorMessage = new ErrorMessage(new Date(), exception.getMessage(), "Acesso não autorizado");
 
-        responseEntityBody.put("message", "Erro no processamento com o gov.br");
-        responseEntityBody.put("status", HttpStatus.UNAUTHORIZED);
+        return errorMessage;
+    }
 
-        return new ResponseEntity(responseEntityBody, HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler(WebClientResponseException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorMessage handleWebClientResponseException(WebClientResponseException exception) {
+        logger.info("AppExceptionHandler | {}", exception.getMessage());
+
+        ErrorMessage errorMessage = new ErrorMessage(new Date(), exception.getMessage(), "Acesso não autorizado");
+
+        return errorMessage;
+    }
+
+    @ExceptionHandler(ImproperDigitalIdentityLevelException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage handleImproperDigitalIdentityLevelException(ImproperDigitalIdentityLevelException exception) {
+        ErrorMessage errorMessage = exception.getErrorMessage();
+
+        logger.info("ImproperDigitalIdentityLevelException | {}", errorMessage.getMessage());
+
+        return errorMessage;
     }
 
     @ExceptionHandler(GeneralSecurityException.class)
-    public ResponseEntity handleGeneralSecurityException(GeneralSecurityException exception) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleGeneralSecurityException(GeneralSecurityException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
-        Map<String, Object> responseEntityBody = new HashMap<>();
+        ErrorMessage errorMessage = new ErrorMessage(new Date(), exception.getMessage(), "Acesso não autorizado");
 
-        responseEntityBody.put("message", "Erro no processamento da assinatura digital.");
-        responseEntityBody.put("status", HttpStatus.BAD_REQUEST);
-
-        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_REQUEST);
+        return errorMessage;
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity handleIOException(IOException exception) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleIOException(IOException exception) {
         logger.info("AppExceptionHandler | {}", exception.getMessage());
 
-        Map<String, Object> responseEntityBody = new HashMap<>();
+        ErrorMessage errorMessage = new ErrorMessage(new Date(), exception.getMessage(), "Acesso não autorizado");
 
-        responseEntityBody.put("message", "Erro no processamento dos dados.");
-        responseEntityBody.put("status", HttpStatus.BAD_REQUEST);
-
-        return new ResponseEntity(responseEntityBody, HttpStatus.BAD_REQUEST);
+        return errorMessage;
     }
 }
