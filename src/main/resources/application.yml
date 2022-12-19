@@ -13,3 +13,5 @@ govbr:
   secret: ${SECRET}
   servidorOauth: ${SERVIDOR_OAUTH}
   assinaturaApiUri: ${ASSINATURA_API_URI}
+  imgRubricSource: ${IMG_RUBRIC_SOURCE}
+  imgQRCodeSource: ${IMG_QR_CODE_SOURCE}
