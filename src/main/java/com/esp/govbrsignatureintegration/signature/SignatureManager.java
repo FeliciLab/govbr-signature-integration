@@ -1,6 +1,7 @@
 package com.esp.govbrsignatureintegration.signature;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -19,10 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
 
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
@@ -121,15 +119,7 @@ public class SignatureManager {
 
         Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
 
-        Optional<String> pdfSignerCreatorOptional = Optional.ofNullable(appearance.getSignatureCreator()).filter(s -> !s.isEmpty());
-
-        String pdfSignerCreator = pdfSignerCreatorOptional.isPresent() ? pdfSignerCreatorOptional.get() : "Fulano de Tal";
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-
-        String dataFormated = simpleDateFormat.format(new Date());
-
-        String content = String.format("Assinado digitalmente por: %s\n" + "Data: %s\n", pdfSignerCreator, dataFormated);
+        String content = Util.getPdfSignatureAppearanceContent(appearance);
 
         appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
                 .setLayer2Text(content).setLayer2FontSize(10f).setSignatureGraphic(ImageDataFactory.create(this.imgRubricSource)) // Imagem lateral da assinatura
