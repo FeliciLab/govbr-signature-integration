@@ -1,4 +1,4 @@
-package com.esp.govbrsignatureintegration.resources;
+package com.esp.govbrsignatureintegration.controllers;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
@@ -20,10 +20,9 @@ import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @RestController
-//@CrossOrigin(origins = "*")
 @RequestMapping("/signPdf")
-public class SignPdfResource {
-    private static final Logger logger = LoggerFactory.getLogger(SignPdfResource.class);
+public class SignPdfController {
+    private static final Logger logger = LoggerFactory.getLogger(SignPdfController.class);
 
     @Autowired
     private GetTokenService getTokenService;

@@ -1,6 +1,7 @@
 package com.esp.govbrsignatureintegration.signature;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -110,22 +111,18 @@ public class SignatureManager {
 
         float pageWidth = pageDimensions.getWidth();
 
-        float rectangleWidth = 250f;
-        float rectangleHeigth = 30f;
+        float rectangleWidth = 400f;
+        float rectangleHeigth = 40f;
 
         float rectangleX = (pageWidth - rectangleWidth - 90f) / 2;
         float rectangleY = rectangleHeigth + 120f;
 
         Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
 
+        String content = Util.getPdfSignatureAppearanceContent(appearance);
+
         appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
-                .setReasonCaption("Razão: ") // Caption da razão
-                .setLocationCaption("Localização: ") // Caption da localização
-                .setContact("Contato") // contato
-                .setReason("ESP - Escola de Saúde Pública do Ceará") // Razão
-                .setLocation("Fortaleza - CE") // localização
-                .setSignatureCreator("govbr-signature-integration") // nome da aplicação
-                .setSignatureGraphic(ImageDataFactory.create(this.imgRubricSource)) // Imagem lateral da assinatura
+                .setLayer2Text(content).setLayer2FontSize(10f).setSignatureGraphic(ImageDataFactory.create(this.imgRubricSource)) // Imagem lateral da assinatura
                 .setPageRect(rectangle).setPageNumber(1);
 
         logger.info("buildAppearence | init");
