@@ -25,18 +25,18 @@ import java.util.Calendar;
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
 
-    private String imgRubricSource;
-
     private String imgQRCodeSource;
+
+    private String imgESPLogoSource;
 
     private static final int ESTIMATED_SIZE = 8192; // Tamanho estimado da assinatura.
     private String token; // token para assinar o documento
     private AssinarPKCS7Service assinarPKCS7Service; // webcliente para fazer a request
 
-    public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service, String imgRubricSource, String imgQRCodeSource) {
+    public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service, String imgESPLogoSource, String imgQRCodeSource) {
         this.token = token;
         this.assinarPKCS7Service = assinarPKCS7Service;
-        this.imgRubricSource = imgRubricSource;
+        this.imgESPLogoSource = imgESPLogoSource;
         this.imgQRCodeSource = imgQRCodeSource;
     }
 
@@ -122,8 +122,11 @@ public class SignatureManager {
         String content = Util.getPdfSignatureAppearanceContent(appearance);
 
         appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
-                .setLayer2Text(content).setLayer2FontSize(10f).setSignatureGraphic(ImageDataFactory.create(this.imgRubricSource)) // Imagem lateral da assinatura
-                .setPageRect(rectangle).setPageNumber(1);
+                .setLayer2Text(content) // setando conteudo da aparência
+                .setLayer2FontSize(10f) // setando tamanho da fonte no layer2
+                .setSignatureGraphic(ImageDataFactory.create(this.imgESPLogoSource)) // Imagem lateral da assinatura
+                .setPageRect(rectangle) // setando o retangulo
+                .setPageNumber(1); // setando a página
 
         logger.info("buildAppearence | init");
     }

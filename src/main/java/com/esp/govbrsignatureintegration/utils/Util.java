@@ -58,14 +58,10 @@ public class Util {
      * @return String com texto que fica na aparência da assinatura digital.
      */
     public static String getPdfSignatureAppearanceContent(PdfSignatureAppearance appearance) {
-        Optional<String> pdfSignerCreatorOptional = Optional.ofNullable(appearance.getSignatureCreator()).filter(s -> !s.isEmpty());
-
-        String pdfSignerCreator = pdfSignerCreatorOptional.isPresent() ? pdfSignerCreatorOptional.get() : "Fulano de Tal";
-
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         String dataFormated = simpleDateFormat.format(new Date());
 
-        return String.format("Assinado digitalmente por: %s\n" + "Data: %s\n", pdfSignerCreator, dataFormated);
+        return String.format("Assinado digitalmente por: %s\n" + "Data: %s\n", "ESP", dataFormated);
     }
 }

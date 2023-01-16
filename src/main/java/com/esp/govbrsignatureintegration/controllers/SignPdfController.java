@@ -30,8 +30,8 @@ public class SignPdfController {
     @Autowired
     private AssinarPKCS7Service assinarPKCS7Service;
 
-    @Value("${govbr.imgRubricSource}")
-    private String imgRubricSource;
+    @Value("${govbr.imgESPLogo}")
+    private String imgESPLogo;
 
     @Value("${govbr.imgQRCodeSource}")
     private String imgQRCodeSource;
@@ -49,7 +49,7 @@ public class SignPdfController {
 
         String token = this.getTokenService.getToken(code);
 
-        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgRubricSource, this.imgQRCodeSource);
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgESPLogo, this.imgQRCodeSource);
 
         byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
@@ -73,7 +73,7 @@ public class SignPdfController {
 
         String token = this.getTokenService.getToken(code);
 
-        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgRubricSource, this.imgQRCodeSource);
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgESPLogo, this.imgQRCodeSource);
 
         for (MultipartFile pdf : pdfs) {
             byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());

@@ -15,3 +15,4 @@ govbr:
   assinaturaApiUri: ${ASSINATURA_API_URI}
   imgRubricSource: ${IMG_RUBRIC_SOURCE}
   imgQRCodeSource: ${IMG_QR_CODE_SOURCE}
+  imgESPLogo: ${IMG_ESP_LOGO}
