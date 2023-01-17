@@ -12,7 +12,6 @@ import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
 public class Util {
     private static final Logger logger = LoggerFactory.getLogger(Util.class);
@@ -54,6 +53,7 @@ public class Util {
 
     /**
      * Retorna conteúdo da aparencia da assinatura digiral.
+     *
      * @param appearance um {@link PdfSignatureAppearance}
      * @return String com texto que fica na aparência da assinatura digital.
      */
@@ -62,6 +62,6 @@ public class Util {
 
         String dataFormated = simpleDateFormat.format(new Date());
 
-        return String.format("Assinado digitalmente por: %s\n" + "Data: %s\n", "ESP", dataFormated);
+        return String.format("Assinado digitalmente por ESP\n" + "Escola de Saúde Pública do Ceará\n" + "Data: %s\n", dataFormated);
     }
 }
