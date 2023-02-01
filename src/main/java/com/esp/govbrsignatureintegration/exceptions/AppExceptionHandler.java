@@ -17,7 +17,6 @@ import java.util.Date;
 @Slf4j
 @RestControllerAdvice
 public class AppExceptionHandler {
-
     private static final Logger logger = LoggerFactory.getLogger(AppExceptionHandler.class);
 
     @ExceptionHandler(AccessDeniedException.class)

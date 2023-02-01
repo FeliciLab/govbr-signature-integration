@@ -1,6 +1,7 @@
 package com.esp.govbrsignatureintegration.signature;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.esp.govbrsignatureintegration.services.GetCertificateService;
 import com.esp.govbrsignatureintegration.utils.Util;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.PageSize;
@@ -20,8 +21,12 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
+import java.security.cert.CertificateException;
 import java.util.Calendar;
 
+/**
+ * Gerenciador de assinatura digital em arquivos que devem ser assinados digitalmente pelo gov.br.
+ */
 public class SignatureManager {
     private static final Logger logger = LoggerFactory.getLogger(SignatureManager.class);
 
@@ -33,14 +38,26 @@ public class SignatureManager {
     private String token; // token para assinar o documento
     private AssinarPKCS7Service assinarPKCS7Service; // webcliente para fazer a request
 
-    public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service, String imgESPLogoSource, String imgQRCodeSource) {
+    private GetCertificateService getCertificateService;
+
+    private String certificateCreatorName;
+
+    public SignatureManager(String token, AssinarPKCS7Service assinarPKCS7Service, GetCertificateService getCertificateService, String imgESPLogoSource, String imgQRCodeSource, String certificateCreatorName) {
         this.token = token;
         this.assinarPKCS7Service = assinarPKCS7Service;
+        this.getCertificateService = getCertificateService;
         this.imgESPLogoSource = imgESPLogoSource;
         this.imgQRCodeSource = imgQRCodeSource;
+        this.certificateCreatorName = certificateCreatorName;
     }
 
-    // Usado para gerar os bytes de um arquivo assinado
+    /**
+     * Gera os bytes de um arquivo pdf com assinatura digital.
+     * @param pdfInputStream
+     * @return
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
     public byte[] getBytesPdfSigned(InputStream pdfInputStream) throws IOException, GeneralSecurityException {
         logger.info("getBytesPdfSigned | init");
 
@@ -53,8 +70,6 @@ public class SignatureManager {
         SignatureContainer signatureContainer = new SignatureContainer(this.token, this.assinarPKCS7Service);
 
         pdfSigner.setSignDate(Calendar.getInstance());
-
-        pdfSigner.setFieldName("Marcelo Alcantara Holanda");
 
         buildAppearence(pdfSigner);
 
@@ -75,6 +90,8 @@ public class SignatureManager {
      * @throws IOException
      */
     private PdfReader addImages(InputStream pdfInputStream) throws IOException {
+        logger.info("addImages | init");
+
         ByteArrayOutputStream baosOfOutput = new ByteArrayOutputStream();
         PdfDocument pdfDoc = new PdfDocument(new PdfReader(pdfInputStream), new PdfWriter(baosOfOutput));
         Document document = new Document(pdfDoc);
@@ -92,6 +109,9 @@ public class SignatureManager {
 
         InputStream in = new ByteArrayInputStream(baosOfOutput.toByteArray());
         PdfReader pdfReader = new PdfReader(in);
+
+        logger.info("addImages | final");
+
         return pdfReader;
     }
 
@@ -101,7 +121,7 @@ public class SignatureManager {
      * @param appearance instância de @{@link PdfSignatureAppearance}
      * @throws MalformedURLException
      */
-    private void buildAppearence(PdfSigner pdfSigner) throws IOException, MalformedURLException {
+    private void buildAppearence(PdfSigner pdfSigner) throws IOException, MalformedURLException, CertificateException {
         logger.info("buildAppearence | init");
 
         PdfSignatureAppearance appearance = pdfSigner.getSignatureAppearance();
@@ -112,14 +132,14 @@ public class SignatureManager {
         float pageWidth = pageDimensions.getWidth();
 
         float rectangleWidth = 400f;
-        float rectangleHeigth = 40f;
+        float rectangleHeigth = 50f;
 
         float rectangleX = (pageWidth - rectangleWidth - 90f) / 2;
         float rectangleY = rectangleHeigth + 120f;
 
         Rectangle rectangle = new Rectangle(rectangleX, rectangleY, rectangleWidth, rectangleHeigth);
 
-        String content = Util.getPdfSignatureAppearanceContent(appearance);
+        String content = Util.getPdfSignatureAppearanceContent(appearance, this.certificateCreatorName);
 
         appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION) // Assinatura gráfica e com descrição
                 .setLayer2Text(content) // setando conteudo da aparência
@@ -128,6 +148,6 @@ public class SignatureManager {
                 .setPageRect(rectangle) // setando o retangulo
                 .setPageNumber(1); // setando a página
 
-        logger.info("buildAppearence | init");
+        logger.info("buildAppearence | final");
     }
 }

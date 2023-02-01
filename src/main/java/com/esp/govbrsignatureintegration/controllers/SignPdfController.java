@@ -1,7 +1,9 @@
 package com.esp.govbrsignatureintegration.controllers;
 
 import com.esp.govbrsignatureintegration.services.AssinarPKCS7Service;
+import com.esp.govbrsignatureintegration.services.GetCertificateService;
 import com.esp.govbrsignatureintegration.services.GetTokenService;
+import com.esp.govbrsignatureintegration.signature.CertificataManager;
 import com.esp.govbrsignatureintegration.signature.SignatureManager;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -30,6 +32,9 @@ public class SignPdfController {
     @Autowired
     private AssinarPKCS7Service assinarPKCS7Service;
 
+    @Autowired
+    private GetCertificateService getCertificateService;
+
     @Value("${govbr.imgESPLogo}")
     private String imgESPLogo;
 
@@ -49,7 +54,11 @@ public class SignPdfController {
 
         String token = this.getTokenService.getToken(code);
 
-        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgESPLogo, this.imgQRCodeSource);
+        CertificataManager certificataManager = new CertificataManager(getCertificateService, token);
+
+        String certificateCreatorName =  certificataManager.getCertificateCreatorName();
+
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.getCertificateService, this.imgESPLogo, this.imgQRCodeSource, certificateCreatorName);
 
         byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());
 
@@ -73,7 +82,11 @@ public class SignPdfController {
 
         String token = this.getTokenService.getToken(code);
 
-        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.imgESPLogo, this.imgQRCodeSource);
+        CertificataManager certificataManager = new CertificataManager(getCertificateService, token);
+
+        String certificateCreatorName =  certificataManager.getCertificateCreatorName();
+
+        SignatureManager signatureManager = new SignatureManager(token, this.assinarPKCS7Service, this.getCertificateService, this.imgESPLogo, this.imgQRCodeSource, certificateCreatorName);
 
         for (MultipartFile pdf : pdfs) {
             byte[] outputBytes = signatureManager.getBytesPdfSigned(pdf.getInputStream());

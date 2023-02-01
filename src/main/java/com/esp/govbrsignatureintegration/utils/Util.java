@@ -57,11 +57,11 @@ public class Util {
      * @param appearance um {@link PdfSignatureAppearance}
      * @return String com texto que fica na aparência da assinatura digital.
      */
-    public static String getPdfSignatureAppearanceContent(PdfSignatureAppearance appearance) {
+    public static String getPdfSignatureAppearanceContent(PdfSignatureAppearance appearance, String certificateCreatorName) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         String dataFormated = simpleDateFormat.format(new Date());
 
-        return String.format("Assinado digitalmente por ESP\n" + "Escola de Saúde Pública do Ceará\n" + "Data: %s\n", dataFormated);
+        return String.format("Assinado digitalmente por:\n%s\n" + "Escola de Saúde Pública do Ceará\n" + "Data: %s\n", certificateCreatorName, dataFormated);
     }
 }

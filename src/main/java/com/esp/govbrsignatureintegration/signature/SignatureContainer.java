@@ -34,6 +34,8 @@ public class SignatureContainer implements IExternalSignatureContainer {
     @Override
     public byte[] sign(InputStream data) {
         try {
+            logger.info("sign | init");
+
             // Gerando o hash do documento preparado
             String hashBase64 = Util.generateHashSHA256(data);
 
@@ -54,6 +56,8 @@ public class SignatureContainer implements IExternalSignatureContainer {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            logger.info("sign | final");
         }
     }
 
